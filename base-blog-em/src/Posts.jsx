@@ -1,5 +1,6 @@
 import { useState } from "react";
-
+import { useQuery } from "react-query";
+//useQuery는 서버에서 데이터를 가져올때 사용할 훅이다.
 import { PostDetail } from "./PostDetail";
 const maxPostPage = 10;
 
@@ -15,8 +16,17 @@ export function Posts() {
   const [selectedPost, setSelectedPost] = useState(null);
 
   // replace with useQuery
-  const data = [];
-
+  const { data, isError, error, isLoading } = useQuery("posts", fetchPosts, {
+    staleTime: 2000,
+  }); //useQuery(쿼리키 , 쿼리 함수(posts 라는 쿼리에 대한 데이터를 가져오는 방법), 옵션)
+  if (isLoading) return <h3>Loading..</h3>;
+  if (isError)
+    return (
+      <>
+        <h3>Error Page</h3>
+        <p>{error.toString()}</p>
+      </>
+    );
   return (
     <>
       <ul>

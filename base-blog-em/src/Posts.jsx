@@ -28,7 +28,10 @@ export function Posts() {
   }, [currentPage, queryClient]);
 
   // replace with useQuery
-  const { data, isError, error, isLoading } = useQuery(
+  //isLoading, isFetching 차이
+  //isLoading = 캐시된 데이터조차 없이, 처음 실행된 쿼리 일 때 로딩 여부에 따라 true/false로 나누어 진다.
+  //isFetching =  어떠한 react-query요청 내부의 비동기 함수가 처리되었는지 여부 에 따라 true/false로 나누어 진다
+  const { data, isError, error, isLoading, isFetching } = useQuery(
     ["posts", currentPage], //[쿼리키 , 쿼리키 ] 의존성배열이 바뀌면 함수도 바뀌기 때문에 데이터가 변경된다.
     () => fetchPosts(currentPage),
     {
@@ -37,6 +40,7 @@ export function Posts() {
     }
   ); //useQuery(쿼리키 , 쿼리 함수(posts 라는 쿼리에 대한 데이터를 가져오는 방법), 옵션)
   if (isLoading) return <h3>Loading..</h3>;
+  if (isFetching) return <h3>Fetching..</h3>;
   if (isError)
     return (
       <>

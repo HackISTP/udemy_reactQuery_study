@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "react-query";
+import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "react-query";
 //useQuery는 서버에서 데이터를 가져올때 사용할 훅이다.
 import { PostDetail } from "./PostDetail";
 const maxPostPage = 10;
@@ -15,12 +15,25 @@ export function Posts() {
   const [currentPage, setCurrentPage] = useState(1); //1페이지로 설정
   const [selectedPost, setSelectedPost] = useState(null);
 
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (currentPage < maxPostPage) {
+      //10번페이지에 있으면 미리 데이터를 가져오지 않아도 된다는 조건
+      const nextPage = currentPage + 1;
+      queryClient.prefetchQuery(["posts", nextPage], () =>
+        fetchPosts(nextPage)
+      ); //다음페이지가 무엇이든간에 미리 데이터를 가져와야한다,
+    }
+  }, [currentPage, queryClient]);
+
   // replace with useQuery
   const { data, isError, error, isLoading } = useQuery(
-    ["posts", currentPage], //[쿼리키 , 쿼리키 ] 배열이 바뀌면 함수도 바뀌기 때문에 데이터가 변경된다.
+    ["posts", currentPage], //[쿼리키 , 쿼리키 ] 의존성배열이 바뀌면 함수도 바뀌기 때문에 데이터가 변경된다.
     () => fetchPosts(currentPage),
     {
       staleTime: 2000,
+      keepPreviousData: true, //쿼리키가 바뀌더라두 지난 데이터를 유지해서 혹여나 이전페이지로 돌아갔을때 캐시에 해당 데이터가 있도록 만들어줌
     }
   ); //useQuery(쿼리키 , 쿼리 함수(posts 라는 쿼리에 대한 데이터를 가져오는 방법), 옵션)
   if (isLoading) return <h3>Loading..</h3>;

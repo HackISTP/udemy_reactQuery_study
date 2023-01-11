@@ -1,5 +1,5 @@
-import { useInfiniteQuery } from "@tanstack/react-query";
 import InfiniteScroll from "react-infinite-scroller";
+import { useInfiniteQuery } from "react-query";
 import { Species } from "./Species";
 
 const initialUrl = "https://swapi.dev/api/species/";
@@ -9,13 +9,40 @@ const fetchUrl = async (url) => {
 };
 
 export function InfiniteSpecies() {
-  // TODO: get data for InfiniteScroll via React Query
-  const { data, fetchNextPage, hasNextPage } = useInfiniteQuery(
-    "sw-people", //queryKey
-    ({ pageParam = initialUrl }) => fetchUrl(pageParam), //쿼리함수 , pageParam 의 기본값 initialUrl
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+  } = useInfiniteQuery(
+    "sw-species",
+    ({ pageParam = initialUrl }) => fetchUrl(pageParam),
     {
-      getNextPageParam: (lastPage) => lastPage.next || undefined, //getNextPageParam 옵션주기 lastPage를 갖고있는 함수이다.
+      getNextPageParam: (lastPage) => lastPage.next || undefined,
     }
-  ); //{data, ,수집할 데이터가 더 있을지 결정(boolean)}
-  return <InfiniteScroll />;
+  );
+  if (isLoading) return <div className="loading">Loading...</div>;
+  if (isError) return <div>Error {error.toString()}</div>;
+  return (
+    <>
+      {isFetching && <div className="loading">Loading...</div>}
+      <InfiniteScroll loadMore={fetchNextPage} hasMore={hasNextPage}>
+        {data.pages.map((pageData) => {
+          return pageData.results.map((person) => {
+            return (
+              <Species
+                key={person.name}
+                name={person.name}
+                language={person.language}
+                averageLifespan={person.average_lifespan}
+              />
+            );
+          });
+        })}
+      </InfiniteScroll>
+    </>
+  );
 }

@@ -4,14 +4,14 @@ import "./App.css";
 import { InfinitePeople } from "./people/InfinitePeople";
 import { InfiniteSpecies } from "./species/InfiniteSpecies";
 
-const queryClient = QueryClient();
 function App() {
+  const queryClient = new QueryClient();
   return (
     <QueryClientProvider client={queryClient}>
       <div className="App">
         <h1>Infinite SWAPI</h1>
-        <InfinitePeople />
-        {/* <InfiniteSpecies /> */}
+        {/* <InfinitePeople /> */}
+        <InfiniteSpecies />
         <ReactQueryDevtools />
       </div>
     </QueryClientProvider>

@@ -31,12 +31,12 @@ export function getMonthYearDetails(initialDate: dayjs.Dayjs): MonthYear {
 }
 
 export function getNewMonthYear(
-  prevData: MonthYear,
+  prevData: MonthYear, // 현재 MonthYear의 상태값
   monthIncrement: number,
 ): MonthYear {
   // update the monthYear by the specified increment
   const newMonthYear = getUpdatedMonthYear(prevData, monthIncrement);
 
   // return object with the details for the new monthYear
-  return getMonthYearDetails(newMonthYear);
+  return getMonthYearDetails(newMonthYear); // 새로운 monthYear 세부 정보를 반환
 }

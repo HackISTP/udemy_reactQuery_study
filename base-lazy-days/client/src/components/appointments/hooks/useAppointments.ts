@@ -1,6 +1,7 @@
 // @ts-nocheck
 import dayjs from 'dayjs';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from 'react-query';
 
 import { axiosInstance } from '../../../axiosInstance';
 import { queryKeys } from '../../../react-query/constants';
@@ -63,6 +64,16 @@ export function useAppointments(): UseAppointments {
   /** ****************** START 3: useQuery  ***************************** */
   // useQuery call for appointments for the current monthYear
 
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    const nextMonthYear = getNewMonthYear(monthYear, 1); // 현재 monthYear 값과 한달이라는 1을 기반으로 하는 nextMonthYear을 얻게 되고 쿼리를 프리페칭하게 된다
+    // prefetchQuery 다음달 에 대한 데이터를 가져온다.
+    queryClient.prefetchQuery(
+      [queryKeys.appointments, nextMonthYear.year, nextMonthYear.month], // 쿼리키는 의존성배열이 되며 appointments, year month로 식별한다.
+      () => getAppointments(nextMonthYear.year, nextMonthYear.month), // 서버호출 즉 쿼리 함수는 미래의 월과 연도가 포함된 getAppointments이다.
+    );
+  }, [queryClient, monthYear]); // monthYear가 업데이트 될때마다
+
   // TODO: update with useQuery!
   // Notes:
   //    1. appointments is an AppointmentDateMap (object with days of month
@@ -70,7 +81,15 @@ export function useAppointments(): UseAppointments {
   //
   //    2. The getAppointments query function needs monthYear.year and
   //       monthYear.month
-  const appointments = {};
+  const fallback = {};
+
+  const { data: appointments = fallback } = useQuery(
+    [queryKeys.appointments, monthYear.year, monthYear.month], // 의존성 배열
+    () => getAppointments(monthYear.year, monthYear.month),
+    // {
+    //   keepPreviousData: true, // 쿼리키가 변경될때 까지 이전의 모든 데이터가 그대로 유지된다.
+    // },
+  );
 
   /** ****************** END 3: useQuery  ******************************* */
 

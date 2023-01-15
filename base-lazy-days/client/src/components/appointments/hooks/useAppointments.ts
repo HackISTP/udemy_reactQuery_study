@@ -1,6 +1,12 @@
 // @ts-nocheck
 import dayjs from 'dayjs';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 import { useQuery, useQueryClient } from 'react-query';
 
 import { axiosInstance } from '../../../axiosInstance';
@@ -60,6 +66,11 @@ export function useAppointments(): UseAppointments {
   //   appointments that the logged-in user has reserved (in white)
   const { user } = useUser();
 
+  const selectFc = useCallback(
+    (data) => getAvailableAppointments(data, user),
+    [user], // 종속성목록에는 user를 넣는다 로그인하는 사용자가 바뀌거나 사용자가 로그아웃을 할때마다 이 함수를 변경해야한다.
+  );
+
   /** ****************** END 2: filter appointments  ******************** */
   /** ****************** START 3: useQuery  ***************************** */
   // useQuery call for appointments for the current monthYear
@@ -86,6 +97,9 @@ export function useAppointments(): UseAppointments {
   const { data: appointments = fallback } = useQuery(
     [queryKeys.appointments, monthYear.year, monthYear.month], // 의존성 배열
     () => getAppointments(monthYear.year, monthYear.month),
+    {
+      select: showAll ? undefined : selectFc,
+    },
     // {
     //   keepPreviousData: true, // 쿼리키가 변경될때 까지 이전의 모든 데이터가 그대로 유지된다.
     // },

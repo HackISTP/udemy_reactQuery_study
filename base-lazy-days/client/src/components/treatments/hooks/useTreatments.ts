@@ -17,7 +17,13 @@ export function useTreatments(): Treatment[] {
   // useTreatments 를 설정하는 방식은 배열을 반환하는 것이다.
   // TODO: get data from server via useQuery
   const fallback = []; // 서버에서 데이터를 받지 않고 캐시가 비어있는경우 아무것도 표현하지 않도록 함
-  const { data = fallback } = useQuery(queryKeys.treatments, getTreatments);
+  const { data = fallback } = useQuery(queryKeys.treatments, getTreatments, {
+    staleTime: 600000, //
+    cacheTime: 900000,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
   // const { data = fallback } = useQuery(queryKeys.treatments, getTreatments, {
   //   onError: (error) => {
   //     // 만약 error가 자바스크립트 error클래스의 인스턴스라면 error의 message프로퍼티에 이름을 설정해야한다.
@@ -35,5 +41,9 @@ export function useTreatments(): Treatment[] {
 export function usePrefetchTreatments(): void {
   // 캐시를 채우는것이 목적이기 때문에 아무것도 반환하지 않아도 된다.
   const queryClient = useQueryClient();
-  queryClient.prefetchQuery(queryKeys.treatments, getTreatments); // (쿼리키 , 쿼리함수)
+  queryClient.prefetchQuery(queryKeys.treatments, getTreatments, {
+    // (쿼리키 , 쿼리함수)
+    staleTime: 600000, //
+    cacheTime: 900000,
+  });
 }
